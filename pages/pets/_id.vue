@@ -3,21 +3,6 @@
     <NavComponent />
 
     <div class="p-5" v-if="pet">
-      <!-- <h1>{{ pet.name }}</h1>
-      <p><strong>Categoría:</strong> {{ pet.category.name }}</p>
-      <p><strong>Url de las fotos:</strong></p>
-      <ul>
-        <li v-for="(url, index) in pet.photoUrls" :key="index">
-          <a :href="url" target="_blank">{{ url }}</a>
-        </li>
-      </ul>
-      <p><strong>Tags:</strong></p>
-      <ul>
-        <li>
-          {{ pet.tags.name }}
-        </li>
-      </ul>
-      <p><strong>Estado:</strong> {{ pet.status }}</p> -->
       <div class="d-flex justify-content-center">
         <div class="card border-info" style="width: 65vw;">
           <h5 class="card-header">Pet</h5>
