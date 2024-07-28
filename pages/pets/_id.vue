@@ -21,8 +21,8 @@
 
               </div>
               <div class="d-flex justify-content-center" v-for="(url, index) in JSON.parse(pet.photoUrls)" :key="index">
-                <a :href="url" target="_blank">
-                  <p class="fs-6">{{ url }}</p>
+                <a class="mt-2" @click.prevent="handleLinkClick(url)">
+                  <img :src="url" height="80px" @error="handleImageError($event)" />
                 </a>
               </div>
             </div>
@@ -66,6 +66,22 @@ export default {
       console.error('Error fetching pet:', error);
       return { pet: null };
     }
+  },
+  methods: {
+    handleImageError(event) {
+      event.target.src = 'https://www.puroverso.uy/images/virtuemart/product/9789974719019.jpg';
+    },
+    handleLinkClick(url) {
+      // Valida si la URL es correcta antes de redirigir
+      if (this.isValidUrl(url)) {
+        window.open(url, '_blank');
+      } else {
+        console.error('Invalid URL:', url);
+      }
+    },
+    isValidUrl(url) {
+      return url.startsWith('http');
+    },
   }
 }
 </script>

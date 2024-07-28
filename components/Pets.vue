@@ -5,11 +5,11 @@
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
-                        <th scope="col">Category</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">PhotoUrls</th>
+                        <th scope="col">Categoría</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Urls fotos</th>
                         <th scope="col">Tags</th>
-                        <th scope="col">Status</th>
+                        <th scope="col">Estados</th>
                         <th scope="col">Acciones</th>
                     </tr>
                 </thead>
@@ -20,7 +20,7 @@
                         <td><span class="fw-bold">{{ pet.name }}</span></td>
                         <td>
                             <div v-for="(url, index) in JSON.parse(pet.photoUrls)" :key="index" style="width: 400px;">
-                                <a :href="url" target="_blank">{{ url }}</a>
+                                <a type="button" @click.prevent="handleLinkClick(url)" class="link-style">{{ url }}</a>
                             </div>
                         </td>
                         <td><span class="fw-bold">{{ pet.tags.name }}</span></td>
@@ -29,6 +29,8 @@
                             </span></td>
                         <td><nuxt-link :to="`/pets/${pet.id}`"><i class="fa-solid fa-eye"></i></nuxt-link>
                             <a type="button" @click="editPet(pet)"><i class="fa-solid fa-edit ms-2"></i></a>
+                            <a type="button" @click="confirmDelete(pet.id)"><i class="fa-solid fa-trash ms-2"
+                                    style="color: red"></i></a>
                         </td>
                     </tr>
                 </tbody>
@@ -91,13 +93,13 @@ export default {
         statusBadgeClass(status) {
             switch (status) {
                 case 'available':
-                    return 'bg-success'; // Bootstrap class for green
+                    return 'bg-success';
                 case 'pending':
-                    return 'bg-warning'; // Bootstrap class for orange
+                    return 'bg-warning';
                 case 'sold':
-                    return 'bg-danger'; // Bootstrap class for red
+                    return 'bg-danger';
                 default:
-                    return 'bg-secondary'; // Default class
+                    return 'bg-secondary';
             }
         },
         editPet(pet) {
@@ -108,9 +110,73 @@ export default {
             this.selectedPet = null;
             this.showModal = true;
         },
+        async deletePet(id) {
+            try {
+                await axios.delete(`http://127.0.0.1:8000/api/pet/${id}`, {
+                    headers: {
+                        'api_key': 'abc1234'
+                    }
+                });
+                return true;
+            } catch (error) {
+                console.error('Error al eliminar el madero:', error);
+                return false;
+            }
+        },
+        async confirmDelete(id) {
+            const result = await this.$swal.fire({
+                title: '¿Está seguro que desea eliminar el pet?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                const success = await this.deletePet(id);
+                if (success) {
+                    await this.fetchPets();
+                    this.$swal.fire({
+                        title: '¡Eliminado!',
+                        text: 'Pet eliminado exitosamente.',
+                        icon: 'success'
+                    });
+                } else {
+                    this.$swal.fire({
+                        title: 'Error',
+                        text: 'Hubo un problema al eliminar el pet.',
+                        icon: 'error'
+                    });
+                }
+            }
+        },
+        handleLinkClick(url) {
+            // Valida si la URL es correcta antes de redirigir
+            if (this.isValidUrl(url)) {
+                window.open(url, '_blank');
+            } else {
+                console.error('Invalid URL:', url);
+            }
+        },
+        isValidUrl(url) {
+            return url.startsWith('http');
+        },
     },
     mounted() {
         this.fetchPets();
     }
 }
 </script>
+
+<style scoped>
+.link-style {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.link-style:hover {
+  color: #0056b3;
+}
+</style>
