@@ -20,13 +20,13 @@
             </b-form-group>
 
             <div class="form-group">
-                <label for="photoUrls">Url de las fotos</label>
+                <label for="photoUrls" class="mt-2">Url de las fotos</label>
                 <textarea v-model="form.photoUrls" class="form-control" id="photoUrls"
                     placeholder="Inserta URLs separadas por comas" rows="3"></textarea>
             </div>
 
             <div class="form-group">
-                <label for="tags">Tags</label>
+                <label for="tags" class="mt-2">Tags</label>
                 <select v-model="form.tags" class="form-control mt-2" required>
                     <option value="">Seleccione</option>
                     <option v-for="tag in tags" :key="tag.id" :value="tag.id">
@@ -40,7 +40,8 @@
             </b-form-group>
 
             <div class="mt-4 d-flex justify-content-end">
-                <b-button type="submit" variant="primary">Guardar</b-button>
+                <b-button v-if="!pet" type="submit" variant="primary">Guardar</b-button>
+                <b-button v-if="pet" type="submit" variant="primary">Actualizar</b-button>
             </div>
         </b-form>
     </b-modal>
@@ -75,6 +76,10 @@ export default {
         statusOptions: {
             type: Array,
             required: true
+        },
+        pet: {
+            type: Object,
+            default: null
         }
     },
     data() {
@@ -92,32 +97,73 @@ export default {
     watch: {
         showModal(newVal) {
             this.localShowModal = newVal;
+            if (newVal && this.pet) {
+                this.form = {
+                    category: this.pet.category.id,
+                    name: this.pet.name,
+                    photoUrls: JSON.parse(this.pet.photoUrls),
+                    tags: this.pet.tags.id,
+                    status: this.pet.status
+                };
+            }
         },
         localShowModal(newVal) {
             this.$emit('update:showModal', newVal);
         }
     },
     methods: {
-        showAlertSuccessForm() {
-            this.$swal.fire({
-                text: 'Pet guardado exitosamente',
-                icon: 'success'
-            });
+        showAlertSuccessForm(error) {
+            if (error == undefined) {
+                if (this.pet) {
+                    this.$swal.fire({
+                        text: 'Pet actualizado exitosamente',
+                        icon: 'success'
+                    });
+                } else {
+                    this.$swal.fire({
+                        text: 'Pet guardado exitosamente',
+                        icon: 'success'
+                    });
+                }
+
+            } else {
+                if (this.pet) {
+                    this.$swal.fire({
+                        title: "Error",
+                        text: "Hubo un problema al actualizar el pet.",
+                        icon: "error"
+                    });
+                } else {
+                    this.$swal.fire({
+                        title: "Error",
+                        text: "Hubo un problema al guardar el pet.",
+                        icon: "error"
+                    });
+                }
+            }
         },
         closeModal() {
             this.$emit('update:showModal', false);
         },
         async handleSubmit() {
+            let alert;
             try {
-                this.form.photoUrls = this.form.photoUrls
-                    .split(',')
-                    .map(url => url.trim());
-                const response = await axios.post('http://127.0.0.1:8000/api/pet', this.form);
+                if (typeof this.form.photoUrls === 'string') {
+                    this.form.photoUrls = this.form.photoUrls.split(',').map(url => url.trim());
+                }
+
+                if (this.pet) {
+                    await axios.post(`http://127.0.0.1:8000/api/pet/${this.pet.id}`, this.form);
+                } else {
+                    await axios.post('http://127.0.0.1:8000/api/pet', this.form);
+                }
                 this.localShowModal = false;
                 this.$emit('pet-saved');
                 this.resetForm();
-                this.showAlertSuccessForm();
+                this.showAlertSuccessForm(alert);
             } catch (error) {
+                alert = error;
+                this.showAlertSuccessForm(alert);
                 console.error('Error submitting form:', error);
             }
         },

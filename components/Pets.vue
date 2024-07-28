@@ -1,6 +1,6 @@
 <template>
     <div class="p-5">
-        <div class="table-responsive">
+        <div v-if="loading == false" class="table-responsive">
             <table class="table align-middle">
                 <thead>
                     <tr>
@@ -27,16 +27,23 @@
                         <td> <span :class="statusBadgeClass(pet.status)" class="badge">
                                 {{ pet.status }}
                             </span></td>
-                        <td><nuxt-link :to="`/pets/${pet.id}`" class="btn btn-primary">View Details</nuxt-link></td>
+                        <td><nuxt-link :to="`/pets/${pet.id}`"><i class="fa-solid fa-eye"></i></nuxt-link>
+                            <a type="button" @click="editPet(pet)"><i class="fa-solid fa-edit ms-2"></i></a>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <div className='mt-4'>
-            <button @click="showModal = true" class="btn btn-success"><span className='fw-bold'>Crear Pet</span></button>
+        <div class="d-flex justify-content-center">
+            <div v-if="loading == true" class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <div v-if="loading == false" className='mt-5'>
+            <button @click="createPet" class="btn btn-success"><span className='fw-bold'>Crear Pet</span></button>
         </div>
         <PetForm :showModal.sync="showModal" :statusOptions="statusOptions" @pet-saved="fetchPets" :category="category"
-            :tags="tags" />
+            :tags="tags" :pet="selectedPet" />
     </div>
 </template>
   
@@ -53,6 +60,7 @@ export default {
     },
     data() {
         return {
+            loading: true,
             showModal: false,
             pets: [],
             category: [],
@@ -64,7 +72,8 @@ export default {
             ],
             category_tags: [
 
-            ]
+            ],
+            selectedPet: null
         };
     },
     methods: {
@@ -74,6 +83,7 @@ export default {
                 this.pets = response.data.pets;
                 this.category = response.data.category;
                 this.tags = response.data.tags;
+                this.loading = false;
             } catch (error) {
                 console.error('Error fetching pets:', error);
             }
@@ -89,7 +99,15 @@ export default {
                 default:
                     return 'bg-secondary'; // Default class
             }
-        }
+        },
+        editPet(pet) {
+            this.selectedPet = pet;
+            this.showModal = true;
+        },
+        createPet() {
+            this.selectedPet = null;
+            this.showModal = true;
+        },
     },
     mounted() {
         this.fetchPets();

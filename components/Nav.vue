@@ -3,21 +3,18 @@
             <nav class="navbar navbar-light bg-light">
                 <div class="container-fluid">
                     <div class="navbar-brand" to="/">
-                        <img :src="logo" height="55px" />
+                        <div class="d-flex">
+                            <img :src="logo" height="75px" />
+                            <p class="mt-3 fst-italic">PetStore</p>
+                        </div>
                     </div>
-                        <!-- <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li className="nav-item">
-                                <Link className="nav-link fw-bold" to="/adminMaderos">Administrar Maderos</Link>
-                            </li>
-                        </ul> -->
-
                 </div>
             </nav>
         </div>
 </template>
 
 <script>
-import logo from '~/assets/images/petstore.jpg';
+import logo from '~/assets/images/petstore.png';
 export default {
     data() {
       return {
