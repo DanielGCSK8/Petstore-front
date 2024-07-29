@@ -1,6 +1,9 @@
 <template>
     <div class="p-5">
-        <div v-if="loading == false" class="table-responsive">
+        <div class='d-flex justify-content-end'>
+            <input type="text" placeholder="Buscar pet..." v-model="searchTerm" @input="handleChange" v-show="!loading"/>
+        </div>
+        <div v-if="!loading" class="table-responsive mt-4">
             <table class="table align-middle">
                 <thead>
                     <tr>
@@ -14,7 +17,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="pet in pets" :key="pet.id" class="align-bottom">
+                    <tr v-for="pet in filteredPets" :key="pet.id" class="align-bottom">
                         <td><span class="fw-bold">{{ pet.id }}</span></td>
                         <td><span class="fw-bold">{{ pet.category.name }}</span></td>
                         <td><span class="fw-bold">{{ pet.name }}</span></td>
@@ -37,11 +40,11 @@
             </table>
         </div>
         <div class="d-flex justify-content-center">
-            <div v-if="loading == true" class="spinner-border text-primary" role="status">
+            <div v-if="loading" class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
-        <div v-if="loading == false" className='mt-5'>
+        <div v-if="!loading" className='mt-5'>
             <button @click="createPet" class="btn btn-success"><span className='fw-bold'>Crear Pet</span></button>
         </div>
         <PetForm :showModal.sync="showModal" :statusOptions="statusOptions" @pet-saved="fetchPets" :category="category"
@@ -75,7 +78,9 @@ export default {
             category_tags: [
 
             ],
-            selectedPet: null
+            selectedPet: null,
+            searchTerm: '',
+            filteredPets: []
         };
     },
     methods: {
@@ -85,6 +90,7 @@ export default {
                 this.pets = response.data.pets;
                 this.category = response.data.category;
                 this.tags = response.data.tags;
+                this.filteredPets = this.pets;
                 this.loading = false;
             } catch (error) {
                 console.error('Error fetching pets:', error);
@@ -163,6 +169,13 @@ export default {
         isValidUrl(url) {
             return url.startsWith('http');
         },
+        handleChange(event) {
+            const value = event.target.value;
+            this.searchTerm = value;
+            this.filteredPets = this.pets.filter(pet =>
+                pet.name.toLowerCase().includes(value.toLowerCase())
+            );
+        },
     },
     mounted() {
         this.fetchPets();
@@ -172,11 +185,11 @@ export default {
 
 <style scoped>
 .link-style {
-  color: #007bff;
-  text-decoration: underline;
+    color: #007bff;
+    text-decoration: underline;
 }
 
 .link-style:hover {
-  color: #0056b3;
+    color: #0056b3;
 }
 </style>

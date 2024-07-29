@@ -21,8 +21,12 @@
 
               </div>
               <div class="d-flex justify-content-center" v-for="(url, index) in JSON.parse(pet.photoUrls)" :key="index">
-                <a class="mt-2" @click.prevent="handleLinkClick(url)">
-                  <img :src="url" height="80px" @error="handleImageError($event)" />
+                <div v-if="loading" class="spinner-border text-primary mt-2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <a class="mt-3" @click.prevent="handleLinkClick(url)">
+                  <img :src="url" height="80px" @load="handleImageLoad" @error="handleImageError($event)"
+                    v-show="!loading" />
                 </a>
               </div>
             </div>
@@ -43,7 +47,9 @@
     </div>
     <div class="p-5" v-else>
       <div class="d-flex justify-content-center">
-        <p>Loading...</p>
+        <div class="spinner-border text-primary mt-2" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
       </div>
     </div>
   </div>
@@ -54,11 +60,15 @@ import axios from 'axios';
 import NavComponent from '~/components/Nav.vue';
 
 export default {
+  data() {
+    return {
+      loading: true
+    };
+  },
   components: {
     NavComponent
   },
   async asyncData({ params }) {
-    console.log(params)
     try {
       const response = await axios.get(`http://127.0.0.1:8000/api/pet/${params.id}`);
       return { pet: response.data.data };
@@ -69,6 +79,7 @@ export default {
   },
   methods: {
     handleImageError(event) {
+      this.loading = false;
       event.target.src = 'https://www.puroverso.uy/images/virtuemart/product/9789974719019.jpg';
     },
     handleLinkClick(url) {
@@ -82,6 +93,9 @@ export default {
     isValidUrl(url) {
       return url.startsWith('http');
     },
+    handleImageLoad() {
+      this.loading = false;
+    }
   }
 }
 </script>
