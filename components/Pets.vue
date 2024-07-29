@@ -1,7 +1,7 @@
 <template>
     <div class="p-5">
         <div class='d-flex justify-content-end'>
-            <input type="text" placeholder="Buscar pet..." v-model="searchTerm" @input="handleChange" v-show="!loading"/>
+            <input type="text" placeholder="Buscar pet..." v-model="searchTerm" @input="handleChange" v-show="!loading" />
         </div>
         <div v-if="!loading" class="table-responsive mt-4">
             <table class="table align-middle">
@@ -16,7 +16,7 @@
                         <th scope="col">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody v-if="filteredPets.length">
                     <tr v-for="pet in filteredPets" :key="pet.id" class="align-bottom">
                         <td><span class="fw-bold">{{ pet.id }}</span></td>
                         <td><span class="fw-bold">{{ pet.category.name }}</span></td>
@@ -38,6 +38,9 @@
                     </tr>
                 </tbody>
             </table>
+            <div v-if="!pets.length" class="d-flex justify-content-center mt-4">
+                <p class="fst-italic">Aún no hay pets creados. Para crear un pet, da clic en el botón Crear Pet</p>
+            </div>
         </div>
         <div class="d-flex justify-content-center">
             <div v-if="loading" class="spinner-border text-primary" role="status">
